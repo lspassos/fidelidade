@@ -1,6 +1,10 @@
 
 
 try {
+  export default function handler(req, res) {
+  res.status(200).json({ status: 'API Instagram funcionando' })
+}
+
   // Configuração da API do Instagram
   const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
   const userId = process.env.INSTAGRAM_USER_ID;
