@@ -15,9 +15,8 @@
     "googleapis": "^128.0.0",
     "axios": "^1.6.0",
     "lucide-react": "^0.263.1"
-  },
+  }
   "engines": {
     "node": ">=18"
   }
-}
-{
+
