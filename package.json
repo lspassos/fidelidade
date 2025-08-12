@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build": "[my-framework] build --output public",
     "start": "next start"
   },
   "dependencies": {
@@ -20,7 +21,3 @@
   }
 }
 {
-  "scripts": {
-    "build": "[my-framework] build --output public"
-  }
-}
