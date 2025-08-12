@@ -1,6 +1,6 @@
 // ==================== package.json ====================
 {
-  "name": "instagram-fidelidade-bar",
+  "name": "fidelidade",
   "version": "1.0.0",
   "private": true,
   "scripts": {
