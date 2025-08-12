@@ -1,64 +1,69 @@
+// Importações no topo do arquivo
 import axios from 'axios';
 
 export default async function handler(req, res) {
+  // 1. Verificação do método HTTP
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
+    return res.status(405).json({ 
+      error: 'Method not allowed' 
+    });
+  }
+
   try {
-    // 1. Configuração segura com variáveis de ambiente
+    // 2. Modo desenvolvimento - dados mockados
+    if (process.env.NODE_ENV !== 'production') {
+      return res.status(200).json({
+        status: 'success',
+        mentions: [{
+          id: 'dev_1',
+          username: 'dev_user',
+          type: 'post',
+          timestamp: new Date().toISOString(),
+          media_url: '',
+          text: 'Exemplo de menção @avidaeumafestacb'
+        }]
+      });
+    }
+
+    // 3. Configuração de produção
     const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
     const userId = process.env.INSTAGRAM_USER_ID;
-    
+
     if (!accessToken || !userId) {
-      return res.status(500).json({ 
-        message: 'Instagram API not configured',
-        error: 'Missing environment variables' 
-      });
+      throw new Error('Variáveis de ambiente não configuradas');
     }
 
-    // 2. Endpoint seguro - NUNCA coloque tokens diretamente no código!
     const apiUrl = `https://graph.instagram.com/${userId}/tags?access_token=${accessToken}`;
-
-    // 3. Busca dados com tratamento de erro
     const response = await axios.get(apiUrl);
-    
-    if (!response.data.data) {
-      return res.status(200).json({ 
-        status: 'success',
-        message: 'No mentions found',
-        mentions: []
-      });
-    }
 
-    // 4. Formatação dos dados
-    const mentions = response.data.data.map(mention => ({
-      id: mention.id,
-      username: mention.username,
-      type: mention.media_type || 'post',
-      timestamp: mention.timestamp,
-      media_url: mention.media_url || '',
-      text: mention.caption || `Menção de @${mention.username}`
-    }));
+    // 4. Formatação da resposta
+    const mentions = response.data.data?.map(item => ({
+      id: item.id,
+      username: item.username || 'unknown',
+      type: item.media_type || 'post',
+      timestamp: item.timestamp || new Date().toISOString(),
+      media_url: item.media_url || '',
+      text: item.caption || `Menção de @${item.username || 'usuário'}`
+    })) || [];
 
-    // 5. Cache control para evitar problemas
-    res.setHeader('Cache-Control', 'no-store, max-age=0');
-    
-    return res.status(200).json({ 
+    // 5. Configuração de cache
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+
+    return res.status(200).json({
       status: 'success',
+      count: mentions.length,
       mentions
     });
-    
+
   } catch (error) {
-    console.error('Instagram API Error:', error);
-    
-    // 6. Tratamento de erros específicos
-    if (error.response?.status === 400) {
-      return res.status(400).json({ 
-        message: 'Invalid Instagram API request',
-        error: error.message 
-      });
-    }
-    
-    return res.status(500).json({ 
-      message: 'Error fetching Instagram data',
-      error: error.message 
+    console.error('Erro na API Instagram:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Erro ao buscar dados',
+      ...(process.env.NODE_ENV !== 'production' && {
+        error: error.message
+      })
     });
   }
 }
