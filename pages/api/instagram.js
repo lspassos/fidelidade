@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
-
+  
   try {
     // Dados mockados para desenvolvimento
     if (process.env.NODE_ENV !== 'production') {
@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
         }]
       });
     }
-
+    
     // Configuração de produção
     const response = await axios.get(`https://graph.instagram.com/${process.env.INSTAGRAM_USER_ID}/media`, {
       params: {
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
         fields: 'id,caption,media_type,media_url,permalink,timestamp'
       }
     });
-
+    
     // Cache de 1 hora
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     
@@ -36,7 +36,6 @@ module.exports = async (req, res) => {
       status: 'success',
       data: response.data.data
     });
-
   } catch (error) {
     console.error('Erro Instagram API:', error.response?.data || error.message);
     return res.status(500).json({
