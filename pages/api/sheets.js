@@ -1,4 +1,21 @@
 // pages/api/sheets.js
+module.exports = async (req, res) => {
+  try {
+    // Seu código para o Google Sheets aqui
+    return res.status(200).json({
+      status: 'success',
+      data: []
+    });
+  } catch (error) {
+    console.error('Erro Google Sheets API:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Erro ao buscar dados do Google Sheets'
+    });
+  }
+};
+// pages/api/sheets.js
+
 const { google } = require('googleapis');
 
 module.exports = async (req, res) => {
